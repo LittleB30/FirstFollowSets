@@ -13,13 +13,11 @@ Non-terminal symbols: S C E
 Terminal symbols: else asg if bool then
 
 First sets:
-===
 S: asg if
 C: bool
 E: lambda else
 
 Follow sets:
-===
 S: $ else
 C: then
 E: $ else
