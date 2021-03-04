@@ -1,22 +1,81 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 /**
  * A class defining a Context-Free Grammar (CFG) containing a list of production rules.
  * @author Alex Smith (alsmi14)
  */
 public class CFGrammar {
+    private List<CFRule> productionRules;
     private Set<String> nonTerminals;
     private Set<String> terminals;
     private Map<String,Set<String>> firstSets;
     private Map<String,Set<String>> followSets;
 
-	public CFGrammar(String file) {
-
+    /**
+     * Constructs a Context-Free Grammar from a given file.
+     * @param fileName the name of the file to be read
+     */
+	public CFGrammar(String fileName) {
+        productionRules = new ArrayList<>();
+        nonTerminals = new HashSet<>();
+        terminals = new HashSet<>();
+        firstSets = new HashMap<>();
+        followSets = new HashMap<>();
+        readGrammar(fileName);
+        findFirstSets();
+        findFollowSets();
 	}
 
-	public void print() {
+    /**
+     * Prints the rules, symbols, and first/follow sets.
+     */
+	public void printAll() {
+        printRules();
+        printSymbols();
+        printFirst();
+        printFollow();
+	}
 
+    /**
+     * Prints the rules.
+     */
+    public void printRules() {
+        System.out.println();
+        for (CFRule rule : productionRules) {
+            System.out.println(rule);
+        }
+	}
+
+    /**
+     * Prints the non-terminal and terminal symbols.
+     */
+    public void printSymbols() {
+        System.out.println();
+        System.out.print("Non-terminal symbols:    " + nonTerminals);
+        System.out.println("Terminal symbols:    " + terminals);
+	}
+
+    /**
+     * Prints the first sets.
+     */
+    public void printFirst() {
+        System.out.println("First sets:\n===");
+        System.out.println(firstSets);
+        //for (Entry<String, Set<String>> e : firstSets.entrySet()) {}
+	}
+
+    /**
+     * Prints the follow sets.
+     */
+    public void printFollow() {
+        System.out.println("Follow sets:\n===");
+        System.out.println(followSets);
 	}
 
     /**

@@ -11,6 +11,6 @@ public class printFF {
         // String file = args[0];
         String file = "G1.txt";
         CFGrammar grammar = new CFGrammar(file);
-        grammar.print();
+        grammar.printAll();
     }
 }
