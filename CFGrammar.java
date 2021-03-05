@@ -1,8 +1,10 @@
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.Map.Entry;
 
@@ -56,8 +58,7 @@ public class CFGrammar {
      * Prints the non-terminal and terminal symbols.
      */
     public void printSymbols() {
-        System.out.println();
-        System.out.print("Non-terminal symbols:    " + nonTerminals);
+        System.out.println("\nNon-terminal symbols:    " + nonTerminals);
         System.out.println("Terminal symbols:    " + terminals);
 	}
 
@@ -65,7 +66,7 @@ public class CFGrammar {
      * Prints the first sets.
      */
     public void printFirst() {
-        System.out.println("First sets:\n===");
+        System.out.println("\nFirst sets:\n===");
         System.out.println(firstSets);
         //for (Entry<String, Set<String>> e : firstSets.entrySet()) {}
 	}
@@ -74,7 +75,7 @@ public class CFGrammar {
      * Prints the follow sets.
      */
     public void printFollow() {
-        System.out.println("Follow sets:\n===");
+        System.out.println("\nFollow sets:\n===");
         System.out.println(followSets);
 	}
 
@@ -115,7 +116,7 @@ public class CFGrammar {
         public String toString() {
             String temp = left + " ::= ";
             for (String t : right) {
-                temp += t + (t.equals(right[right.length-1])? "":" ");
+                temp += t + (t == right[right.length-1]? "":" ");
             }
             return temp;
         }
@@ -131,15 +132,50 @@ public class CFGrammar {
         }
     }
 
-    private void readGrammar(String file) {
+    /**
+     * Reads a grammar from a file into the production rules arraylist.
+     * @param fileName the name of the file to be read
+     */
+    private void readGrammar(String fileName) { //TODO implement readGrammar
+        Scanner scan = null;
+		try {
+			scan = new Scanner(new File(fileName));
+        } catch (Exception e) {
+            System.out.println(e.getStackTrace());
+            return;
+        }
+        scan.nextLine(); //skip the grammar title
+
+        while (scan.hasNext()) {
+            productionRules.add(new CFRule(scan.nextLine()));
+        }
+
+        findSymbols();
+    }
+
+    /**
+     * Finds the non-terminal and terminal symbols of the grammar.
+     */
+    private void findSymbols() {
+        //look along the left side for non-terminals
+        for (CFRule rule : productionRules) {
+            nonTerminals.add(rule.left);
+        }
+        //then look along the right side for symbols that are not in the non-terminals set
+        for (CFRule rule : productionRules) {
+            for (String symbol : rule.right) {
+                if (!nonTerminals.contains(symbol)) {
+                    terminals.add(symbol);
+                }
+            }
+        }
+    }
+
+    private void findFirstSets() { //TODO implement findFirstSets
 
     }
 
-    private void findFirstSets() {
-
-    }
-
-    private void findFollowSets() {
+    private void findFollowSets() { //TODO implement findFollowSets
         
     }
 }
