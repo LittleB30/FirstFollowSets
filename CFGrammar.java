@@ -16,12 +16,14 @@ import java.util.Map.Entry;
  * @author Alex Smith (alsmi14)
  */
 public class CFGrammar {
+    private static final String END_SYMBOL = "$";
+    private static final String LAMBDA = "lambda";
     private List<CFRule> productionRules;
     private Set<String> nonTerminals;
     private Set<String> terminals;
+    private String startSymbol;
     private Map<String,Set<String>> firstSets;
     private Map<String,Set<String>> followSets;
-    private final String LAMBDA = "lambda";
 
     /**
      * Constructs a Context-Free Grammar from a given file.
@@ -67,17 +69,20 @@ public class CFGrammar {
      * Prints the first sets.
      */
     public void printFirst() {
-        System.out.println("\nFirst sets:\n===");
-        System.out.println(firstSets);
-        //for (Entry<String, Set<String>> e : firstSets.entrySet()) {}
+        System.out.println("\nFirst sets:\n==========");
+        for (Entry<String, Set<String>> e : firstSets.entrySet()) {
+            System.out.println(e.getKey() + ": " + e.getValue());
+        }
 	}
 
     /**
      * Prints the follow sets.
      */
     public void printFollow() {
-        System.out.println("\nFollow sets:\n===");
-        System.out.println(followSets);
+        System.out.println("\nFollow sets:\n===========");
+        for (Entry<String, Set<String>> e : followSets.entrySet()) {
+            System.out.println(e.getKey() + ": " + e.getValue());
+        }
 	}
 
     /**
@@ -140,7 +145,7 @@ public class CFGrammar {
     }
 
     /**
-     * Finds the non-terminal and terminal symbols of the grammar.
+     * Finds the non-terminal, terminal, and start symbols of the grammar.
      */
     private void findSymbols() {
         //look along the left side for non-terminals
@@ -155,6 +160,8 @@ public class CFGrammar {
                 }
             }
         }
+        //the left of the first production rule is the start symbol
+        startSymbol = productionRules.get(0).left;
     }
 
     /**
@@ -235,7 +242,7 @@ public class CFGrammar {
                 temp.remove(LAMBDA);
                 return set.addAll(temp);
             }
-        } else if (firstSets.get(str[0]).contains(LAMBDA)) {
+        } else if (firstSets.get(str[0]).contains(LAMBDA)) { //TODO bad this never runs
                 return firstSetHelper(set, new String[]{str[0]}, false) || 
                 firstSetHelper(set, Arrays.copyOfRange(str, 1, str.length), true);
         } else { 
@@ -246,16 +253,45 @@ public class CFGrammar {
     /**
      * Finds the follow set of each non-terminal symbol of the CFGrammar.
      */
-    private void findFollowSets() { //TODO implement findFollowSets
-        
+    private void findFollowSets() {
+        followSets.get(startSymbol).add(END_SYMBOL);
+        while (followIteration());
     }
 
-    /**
-     * Finds the follow set of a given string.
-     * @param str the string to be evaluated
-     * @return the follow set of the string
-     */
-    private Set<String> followSet(String str) {
-        return null;
+    private boolean followIteration() {
+        boolean changeMade = false;
+        for (CFRule rule : productionRules) {
+            for (int i = 0; i < rule.right.length; i++) {
+                changeMade = followSetHelper(followSets.get(rule.right[i]), rule.left, Arrays.copyOfRange(rule.right, i, rule.right.length)) ||
+                    changeMade;
+            }
+        }
+        return changeMade;
+    }
+
+    private boolean followSetHelper(Set<String> set, String left, String[] curRight) {
+        if (nonTerminals.contains(curRight[0])) {
+            if (curRight.length == 1) {
+                return set.addAll(followSets.get(left));
+            } else if (nonTerminals.contains(curRight[1])) {
+                if (firstSets.get(curRight[1]).contains(LAMBDA)) {
+                    Set<String> tempSet = new HashSet<>();
+                    tempSet.addAll(firstSets.get(curRight[1]));
+                    tempSet.remove(LAMBDA);
+                    String[] tempArr;
+                    if (curRight.length == 2) {
+                        tempArr = new String[]{curRight[1]};
+                    } else {
+                        tempArr = Arrays.copyOfRange(curRight, 1, curRight.length);
+                    }
+                    return set.addAll(tempSet) || followSetHelper(set, left, tempArr);
+                } else {
+                    return set.addAll(firstSets.get(curRight[1]));
+                }
+            } else {
+                return set.add(curRight[1]);
+            }
+        }
+        return false;
     }
 }
