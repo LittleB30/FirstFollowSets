@@ -1,7 +1,10 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -18,6 +21,7 @@ public class CFGrammar {
     private Set<String> terminals;
     private Map<String,Set<String>> firstSets;
     private Map<String,Set<String>> followSets;
+    private final String LAMBDA = "lambda";
 
     /**
      * Constructs a Context-Free Grammar from a given file.
@@ -25,13 +29,10 @@ public class CFGrammar {
      */
 	public CFGrammar(String fileName) {
         productionRules = new ArrayList<>();
-        nonTerminals = new HashSet<>();
+        nonTerminals = new LinkedHashSet<>();
         terminals = new HashSet<>();
-        firstSets = new HashMap<>();
-        followSets = new HashMap<>();
         readGrammar(fileName);
-        findFirstSets();
-        findFollowSets();
+        initializeSets();
 	}
 
     /**
@@ -95,22 +96,6 @@ public class CFGrammar {
         }
 
         /**
-         * Gets a copy the left variable.
-         * @return this.left
-         */
-        public String getLeft() { 
-            return String.valueOf(left);
-        }
-
-        /**
-         * Gets a copy of the right variable.
-         * @return this.right
-         */
-        public String[] getRight() {
-            return right.clone();
-        }
-
-        /**
          * Returns a string representation of the CFRule.
          */
         public String toString() {
@@ -136,7 +121,7 @@ public class CFGrammar {
      * Reads a grammar from a file into the production rules arraylist.
      * @param fileName the name of the file to be read
      */
-    private void readGrammar(String fileName) { //TODO implement readGrammar
+    private void readGrammar(String fileName) {
         Scanner scan = null;
 		try {
 			scan = new Scanner(new File(fileName));
@@ -150,6 +135,7 @@ public class CFGrammar {
             productionRules.add(new CFRule(scan.nextLine()));
         }
 
+        scan.close();
         findSymbols();
     }
 
@@ -171,11 +157,105 @@ public class CFGrammar {
         }
     }
 
-    private void findFirstSets() { //TODO implement findFirstSets
-
+    /**
+     * Puts empty sets into the first and follow sets maps and calculates their sets.
+     */
+    private void initializeSets() {
+        firstSets = new LinkedHashMap<>();
+        followSets = new LinkedHashMap<>();
+        for (String symbol : nonTerminals) {
+            Set<String> temp = new HashSet<>();
+            firstSets.put(symbol, temp);
+        }
+        for (String symbol : nonTerminals) {
+            Set<String> temp = new HashSet<>();
+            followSets.put(symbol, temp);
+        }
+        findFirstSets();
+        findFollowSets();
     }
 
+    /**
+     * Finds the first set of each non-terminal symbol of the CFGrammar.
+     */
+    private void findFirstSets() {
+        Map<String,List<String[]>> dependencies = findFirstDependencies();
+        while (firstIteration(dependencies));
+    }
+
+    /**
+     * Finds the CFRules that each non-terminal symbol depends on to calculate their first sets.
+     * @return a map of the dependencies <non-terminal, List of right sides of CFRules>
+     */
+    private Map<String,List<String[]>> findFirstDependencies() {
+        Map<String,List<String[]>> dependencies = new HashMap<>();
+        for (String symbol : nonTerminals) {
+            List<String[]> temp = new ArrayList<>();
+            dependencies.put(symbol, temp);
+        }
+        for (CFRule rule : productionRules) {
+            dependencies.get(rule.left).add(rule.right);
+        }
+        return dependencies;
+    }
+
+    /**
+     * Performs a single iteration of calculating the first sets of each non-terminal symbol.
+     * @param dependencies a map of the dependencies <non-terminal, List of right sides of CFRules>
+     * @return true if a change was made to the firstSets map, false otherwise
+     */
+    private boolean firstIteration(Map<String,List<String[]>> dependencies) {
+        boolean changeMade = false;
+        boolean addLambda;
+        for (Entry<String, List<String[]>> entry : dependencies.entrySet()) {
+            for (String[] right : entry.getValue()) {
+                addLambda = (nonTerminals.contains(right[0]))? !firstSets.get(right[0]).contains(LAMBDA) : true;
+                changeMade = firstSetHelper(firstSets.get(entry.getKey()), right, addLambda) || changeMade;
+            }
+        }
+        return changeMade;
+    }
+
+    /**
+     * Recursive method to calculate the first set of a given string.
+     * @param set string set to be added to
+     * @param str string array corresponding to the right side of a CFRule
+     * @param addLambda boolean specifying whether or not lambda should be added
+     * @return true if a change was made to the given set, false otherwise
+     */
+    private boolean firstSetHelper(Set<String> set, String[] str, boolean addLambda){
+        if (terminals.contains(str[0])) {
+            return set.add(str[0]);
+        } else if (nonTerminals.contains(str[0])) {
+            if (addLambda) {
+                return set.addAll(firstSets.get(str[0]));
+            } else {
+                Set<String> temp = new HashSet<>();
+                temp.addAll(firstSets.get(str[0]));
+                temp.remove(LAMBDA);
+                return set.addAll(temp);
+            }
+        } else if (firstSets.get(str[0]).contains(LAMBDA)) {
+                return firstSetHelper(set, new String[]{str[0]}, false) || 
+                firstSetHelper(set, Arrays.copyOfRange(str, 1, str.length), true);
+        } else { 
+            return firstSetHelper(set, new String[]{str[0]}, true);
+        }
+    }
+
+    /**
+     * Finds the follow set of each non-terminal symbol of the CFGrammar.
+     */
     private void findFollowSets() { //TODO implement findFollowSets
         
+    }
+
+    /**
+     * Finds the follow set of a given string.
+     * @param str the string to be evaluated
+     * @return the follow set of the string
+     */
+    private Set<String> followSet(String str) {
+        return null;
     }
 }
