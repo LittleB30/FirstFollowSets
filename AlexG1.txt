@@ -1,4 +1,4 @@
-Grammar 1
+Alex Grammar 1
 S ::= A S b
 S ::= C
 A ::= a

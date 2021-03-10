@@ -1,4 +1,4 @@
-Grammar 2
+Alex Grammar 2
 E ::= T E'
 E' ::= + T E'
 E' ::= lambda
