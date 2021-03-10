@@ -1,0 +1,9 @@
+Grammar 2
+E ::= T E'
+E' ::= + T E'
+E' ::= lambda
+T ::= F T'
+T' ::= * F T'
+T' ::= lambda
+F ::= ( E )
+F ::= id

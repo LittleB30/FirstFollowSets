@@ -1,0 +1,6 @@
+Grammar 1
+S ::= A S b
+S ::= C
+A ::= a
+C ::= c C
+C ::= lambda
