@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 /**
  * A class defining a Context-Free Grammar (CFG) containing a list of production rules.
  * @author Alex Smith (alsmi14)
+ * @date 3/12/2021
  */
 public class CFGrammar {
     private static final String END_SYMBOL = "$";
@@ -45,6 +46,7 @@ public class CFGrammar {
         printSymbols();
         printFirst();
         printFollow();
+        System.out.println();
 	}
 
     /**
@@ -84,6 +86,22 @@ public class CFGrammar {
             System.out.println(e.getKey() + ": " + e.getValue());
         }
 	}
+
+    /**
+     * Gets the first sets map.
+     * @return this.firstSets
+     */
+    public Map<String,Set<String>> getFirstSets() {
+        return firstSets;
+    }
+
+    /**
+     * Gets the follow sets map.
+     * @return this.firstSets
+     */
+    public Map<String,Set<String>> getFollowSets() {
+        return followSets;
+    }
 
     /**
      * An inner class defining a context-free production rule used for the Entry class.
@@ -131,7 +149,7 @@ public class CFGrammar {
 		try {
 			scan = new Scanner(new File(fileName));
         } catch (Exception e) {
-            System.out.println(e.getStackTrace());
+            System.out.println(new File(".").getAbsolutePath());
             return;
         }
         scan.nextLine(); //skip the grammar title
@@ -213,11 +231,9 @@ public class CFGrammar {
      */
     private boolean firstIteration(Map<String,List<String[]>> dependencies) {
         boolean changeMade = false;
-        boolean addLambda;
         for (Entry<String, List<String[]>> entry : dependencies.entrySet()) {
             for (String[] right : entry.getValue()) {
-                addLambda = (nonTerminals.contains(right[0]))? !firstSets.get(right[0]).contains(LAMBDA) : true;
-                changeMade = firstSetHelper(firstSets.get(entry.getKey()), right, addLambda) || changeMade;
+                changeMade = firstSetHelper(firstSets.get(entry.getKey()), right) || changeMade;
             }
         }
         return changeMade;
@@ -227,26 +243,18 @@ public class CFGrammar {
      * Recursive method to calculate the first set of a given string.
      * @param set string set to be added to
      * @param str string array corresponding to the right side of a CFRule
-     * @param addLambda boolean specifying whether or not lambda should be added
      * @return true if a change was made to the given set, false otherwise
      */
-    private boolean firstSetHelper(Set<String> set, String[] str, boolean addLambda){
+    private boolean firstSetHelper(Set<String> set, String[] str){
         if (terminals.contains(str[0])) {
             return set.add(str[0]);
-        } else if (nonTerminals.contains(str[0])) {
-            if (addLambda) {
-                return set.addAll(firstSets.get(str[0]));
-            } else {
-                Set<String> temp = new HashSet<>();
-                temp.addAll(firstSets.get(str[0]));
-                temp.remove(LAMBDA);
-                return set.addAll(temp);
-            }
-        } else if (firstSets.get(str[0]).contains(LAMBDA)) { //TODO bad this never runs
-                return firstSetHelper(set, new String[]{str[0]}, false) || 
-                firstSetHelper(set, Arrays.copyOfRange(str, 1, str.length), true);
+        } else if (firstSets.get(str[0]).contains(LAMBDA) && str.length > 1) {
+            Set<String> temp = new HashSet<>();
+            temp.addAll(firstSets.get(str[0]));
+            temp.remove(LAMBDA);
+            return set.addAll(temp) || firstSetHelper(set, Arrays.copyOfRange(str, 1, str.length));
         } else { 
-            return firstSetHelper(set, new String[]{str[0]}, true);
+            return set.addAll(firstSets.get(str[0]));
         }
     }
 
