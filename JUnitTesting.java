@@ -9,7 +9,8 @@ import java.util.Set;
 import org.junit.Test;
 
 /**
- * @author Alex Smith (3/12/21)
+ * @author Alex Smith (alsmi14)
+ * @date 3/12/2021
  */
 public class JUnitTesting {
     private CFGrammar grammar;
