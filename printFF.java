@@ -1,6 +1,7 @@
 /**
  * Driver class to run the CFGrammer.
  * @author Alex Smith (alsmi14)
+ * @date 3/12/2021
  */
 public class printFF {
     public static void main(String[] args) {
