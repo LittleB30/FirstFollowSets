@@ -149,8 +149,8 @@ public class CFGrammar {
 		try {
 			scan = new Scanner(new File(fileName));
         } catch (Exception e) {
-            System.out.println(new File(".").getAbsolutePath());
-            return;
+            e.printStackTrace();
+            System.exit(0);
         }
         scan.nextLine(); //skip the grammar title
 
