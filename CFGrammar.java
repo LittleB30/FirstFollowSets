@@ -286,20 +286,15 @@ public class CFGrammar {
                     Set<String> tempSet = new HashSet<>();
                     tempSet.addAll(firstSets.get(curRight[1]));
                     tempSet.remove(LAMBDA);
-                    String[] tempArr;
-                    if (curRight.length == 2) {
-                        tempArr = new String[]{curRight[1]};
-                    } else {
-                        tempArr = Arrays.copyOfRange(curRight, 1, curRight.length);
-                    }
-                    return set.addAll(tempSet) || followSetHelper(set, left, tempArr);
+                    return set.addAll(tempSet) || followSetHelper(set, left, Arrays.copyOfRange(curRight, 1, curRight.length));
                 } else {
                     return set.addAll(firstSets.get(curRight[1]));
                 }
             } else {
                 return set.add(curRight[1]);
             }
+        } else {
+            return false;
         }
-        return false;
     }
 }
