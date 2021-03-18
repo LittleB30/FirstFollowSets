@@ -104,7 +104,7 @@ public class CFGrammar {
     }
 
     /**
-     * An inner class defining a context-free production rule used for the Entry class.
+     * An inner class defining a context-free production rule.
      */
     private class CFRule {
         private String left;
@@ -141,7 +141,7 @@ public class CFGrammar {
     }
 
     /**
-     * Reads a grammar from a file into the production rules arraylist.
+     * Reads a grammar from a file into the production rules list.
      * @param fileName the name of the file to be read
      */
     private void readGrammar(String fileName) {
@@ -266,6 +266,10 @@ public class CFGrammar {
         while (followIteration());
     }
 
+    /**
+     * Performs a single iteration of calculating the follow set of each non-terminal symbol in every production rule.
+     * @return true if a change was made to the given set, false otherwise
+     */
     private boolean followIteration() {
         boolean changeMade = false;
         for (CFRule rule : productionRules) {
@@ -277,6 +281,13 @@ public class CFGrammar {
         return changeMade;
     }
 
+    /**
+     * Recursive method to calculate the follow set of a given string.
+     * @param set string set to be added to
+     * @param left the left side of the current production rule
+     * @param curRight the current segment of the right side of a production rule
+     * @return true if a change was made to the given set, false otherwise
+     */
     private boolean followSetHelper(Set<String> set, String left, String[] curRight) {
         if (nonTerminals.contains(curRight[0])) {
             if (curRight.length == 1) {

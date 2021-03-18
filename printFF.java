@@ -6,12 +6,12 @@
 public class printFF {
     public static void main(String[] args) {
         // if (args.length < 1) {
-        //     System.out.println("Usage: printFF fileName);
+        //     System.out.println("Usage: printFF fileName");
         //     return;
         // }
-        // String file = args[0];
-        String file = "G1.txt";
-        CFGrammar grammar = new CFGrammar(file);
+        // String fileName = args[0];
+        String fileName = "G3.txt";
+        CFGrammar grammar = new CFGrammar(fileName);
         grammar.printAll();
     }
 }
